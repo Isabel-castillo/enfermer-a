@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Malla Curricular Enfermería</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: 'Montserrat', Arial, sans-serif; background: #ffe6f0; margin: 0; padding: 0; }
+    h1 { text-align: center; background: #f8b3db; color: #a04ca2; margin: 1.2em auto 1em auto; padding: 0.5em 0 0.5em 0; letter-spacing: 1px; font-weight: 700; border-radius: 10px; width: 250px; min-width: 150px; max-width: 90vw; box-shadow: 0 2px 8px #e4d4f7; font-size: 1.2em; }
+    .container { display: flex; justify-content: center; margin: 1.5em 0 0 0; width: 100%; }
+    #malla { display: flex; flex-direction: row; gap: 0.8em; flex-wrap: nowrap; justify-content: flex-start; align-items: flex-start; width: 100%; max-width: 100vw; overflow-x: auto; scrollbar-width: thin; scrollbar-color: #f8b3db #ffe6f0; }
+    .semestre { background: #ffe1f2; border-radius: 14px; box-shadow: 0 1px 7px #e4d4f7; padding: 0.7em 0.7em 1.2em 0.7em; min-width: 160px; max-width: 160px; display: flex; flex-direction: column; align-items: center; margin-bottom: 0.4em; flex: 0 0 auto; }
+    .semestre h2 { color: #d97ab8; margin-top: 0; font-size: 1em; text-align: center; font-weight: 700; margin-bottom: 0.45em; letter-spacing: 0.8px; }
+    .asignaturas { display: flex; flex-direction: column; gap: 0.38em; width: 100%; align-items: stretch; margin: 0; padding: 0; }
+    .asignatura { cursor: pointer; font-size: 0.92em; background: #ffe1f2; border: 2px solid #f8b3db; border-radius: 9px; min-width: 0; padding: 0.6em 0.15em; text-align: center; margin: 0; transition: color 0.2s, text-decoration 0.2s, box-shadow 0.2s, background 0.2s, border-color 0.2s, opacity 0.25s, filter 0.25s; box-shadow: 0 1px 5px #e4d4f7; font-weight: 500; user-select: none; opacity: 0.5; filter: grayscale(0.7) blur(0.2px); }
+    .asignatura.tachada { text-decoration: line-through; color: #8269b7; background: #e1d7fd; border-color: #bca2e7; opacity: 1; box-shadow: none; filter: none; }
+    .asignatura.habilitada { opacity: 0.8; filter: none; cursor: pointer; }
+    .asignatura.requisito { opacity: 0.18; filter: grayscale(1) blur(1px) brightness(1.15); cursor: not-allowed; pointer-events: none; font-size: 0.93em; }
+    .asignatura:hover:not(.tachada):not(.requisito) { box-shadow: 0 2px 9px #f8b3db40; background: #ffd6eb; border-color: #d97ab8; opacity: 1; filter: none; }
+    @media (max-width: 900px) { #malla { max-width: 98vw; } .semestre { min-width: 120px; max-width: 120px; padding: 0.5em 0.2em 0.7em 0.2em; } .asignatura { font-size: 0.76em; padding: 0.4em 0.08em; } }
+    @media (max-width: 500px) { #malla { flex-direction: column; align-items: center; overflow-x: unset; } .semestre { width: 92vw; min-width: unset; max-width: unset; margin-bottom: 1em; } }
+  </style>
+</head>
+<body>
+  <h1>Malla Curricular</h1>
+  <div class="container">
+    <div id="malla"></div>
+  </div>
+  <script>
+    // Malla con ids y requisitos
+    const malla = [
+      {
+        semestre: "1°",
+        asignaturas: [
+          { nombre: "Morfología Básica", id: "morfologia-basica" },
+          { nombre: "Química General y Orgánica", id: "quimica" },
+          { nombre: "Biología Celular", id: "biologia-celular" },
+          { nombre: "Bases de la Enfermería", id: "bases-enfermeria" },
+          { nombre: "Psicología Evolutiva", id: "psicologia-evolutiva" },
+          { nombre: "Antropología", id: "antropologia" }
+        ]
+      },
+      {
+        semestre: "2°",
+        asignaturas: [
+          { nombre: "Integrado Fisiología-Fisiopatología I", id: "fisiologia", requiere: ["biologia-celular","quimica"] },
+          { nombre: "Bioquímica General", id: "bioquimica", requiere: ["quimica"] },
+          { nombre: "Microbiología General", id: "microbiologia-general", requiere: ["biologia-celular"] },
+          { nombre: "Salud Digital", id: "salud-digital" },
+          { nombre: "Salud Intercultural", id: "salud-intercultural" },
+          { nombre: "IAAS", id: "iaas" }
+        ]
+      },
+      {
+        semestre: "3°",
+        asignaturas: [
+          { nombre: "Integrado Fisiología-Fisiopatología II", id: "fisiologia2", requiere: ["fisiologia"] },
+          { nombre: "Farmacología General", id: "farmacologia", requiere: ["fisiologia"] },
+          { nombre: "Salud Poblacional", id: "salud-poblacional" },
+          { nombre: "Enfermería en el Curso de Vida", id: "curso-de-vida" },
+          { nombre: "Educación para la Salud", id: "educacion-salud" },
+          { nombre: "Comunicación Interdisciplinar", id: "comunicacion-interdisciplinar" }
+        ]
+      },
+      {
+        semestre: "4°",
+        asignaturas: [
+          { nombre: "Administración para la Gestión del Cuidado", id: "administracion-cuidado" },
+          { nombre: "Gestión del Cuidado del Adulto I", id: "cuidado-adulto", requiere: ["curso-de-vida"] },
+          { nombre: "Ética", id: "etica", requiere: ["antropologia"] },
+          { nombre: "Bases de Práctica Basada en Evidencia", id: "bases-evidencia" },
+          { nombre: "Hito Evaluativo", id: "hito-evaluativo", hito: true }
+        ]
+      },
+      {
+        semestre: "5°",
+        asignaturas: [
+          { nombre: "Epidemiología", id: "epidemiologia", requiere: ["salud-poblacional"] },
+          { nombre: "Gestión del Cuidado del Adulto II", id: "cuidado-adulto2", requiere: ["cuidado-adulto"] },
+          { nombre: "Medio Ambiente, Salud y Enfermería", id: "medio-ambiente", requiere: ["administracion-cuidado"] },
+          { nombre: "Bioestadística", id: "bioestadistica" },
+          { nombre: "Gestión de Proyectos en Salud", id: "gestion-proyectos", requiere: ["administracion-cuidado"] },
+          { nombre: "Persona y Sociedad", id: "persona-sociedad", requiere: ["etica"] }
+        ]
+      },
+      {
+        semestre: "6°",
+        asignaturas: [
+          { nombre: "Metodología de la Investigación", id: "metodologia-investigacion" },
+          { nombre: "Gestión del Cuidado de Persona Mayor", id: "cuidado-persona-mayor", dependeTachar: "cuidado-adulto2" },
+          { nombre: "Enfermería en Salud Mental y Psiquiatría", id: "salud-mental", requiere: ["cuidado-adulto2"] },
+          { nombre: "Formación Integral", id: "formacion-integral" },
+          { nombre: "Liderazgo y Toma de Decisiones en Salud", id: "liderazgo", requiere: ["gestion-proyectos"] },
+          { nombre: "Electivo I: Formación y Identidad", id: "electivo1-formacion-identidad" }
+        ]
+      },
+      {
+        semestre: "7°",
+        asignaturas: [
+          { nombre: "Gestión del Cuidado en la Niñez y Adolescencia", id: "cuidado-ninez-adolescencia", requiere: ["cuidado-adulto2"] },
+          { nombre: "Enfermería en Salud Familiar y Comunitaria", id: "salud-familiar-comunitaria", requiere: ["salud-mental"] },
+          { nombre: "Gerencia y Gobernanza para la Gestión en Salud", id: "gerencia-gobernanza", requiere: ["liderazgo"] },
+          { nombre: "Proyecto de Investigación", id: "proyecto-investigacion", requiere: ["metodologia-investigacion"] },
+          { nombre: "Bioética", id: "bioetica" },
+          { nombre: "Electivo II: Formación y Identidad", id: "electivo2-formacion-identidad" }
+        ]
+      },
+      {
+        semestre: "8°",
+        asignaturas: [
+          { nombre: "Enfermería de Urgencia", id: "urgencia", requiere: ["cuidado-ninez-adolescencia"] },
+          { nombre: "Enfermería en Oncología y Cuidados Paliativos", id: "oncologia-paliativos", requiere: ["salud-familiar-comunitaria"] },
+          { nombre: "Liderazgo para la Gestión del Cambio en Equipos de Salud", id: "liderazgo-cambio", requiere: ["gerencia-gobernanza"] },
+          { nombre: "Práctica Basada en la Evidencia", id: "evidencia", requiere: ["proyecto-investigacion"] },
+          { nombre: "Electivo III: Formación y Identidad", id: "electivo3-formacion-identidad" }
+        ]
+      },
+      {
+        semestre: "9°",
+        asignaturas: [
+          { nombre: "Internado Clínico Asistencial", id: "internado-clinico", requiereSemestres: [6,7] },
+          { nombre: "Electivo I", id: "electivo1", requiereSemestres: [6,7] },
+          { nombre: "Gestión de Carrera y Desarrollo Profesional", id: "gestion-carrera" }
+        ]
+      },
+      {
+        semestre: "10°",
+        asignaturas: [
+          { nombre: "Internado de Salud Familiar y Comunitaria", id: "internado-familiar-comunitaria", requiereSemestres: [6,7] },
+          { nombre: "Internado Gestión en Salud", id: "internado-gestion-salud", requiereSemestres: [6,7] },
+          { nombre: "Electivo II", id: "electivo2-10", requiereSemestres: [6,7] }
+        ]
+      }
+    ];
+
+    // --- Estado tachado: se guarda y se lee de localStorage ---
+    const STORAGE_KEY = "progreso_malla_enfermeria";
+    let tachadas = {};
+
+    function guardarProgreso() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tachadas)); } catch (e) {}
+    }
+
+    function cargarProgreso() {
+      try {
+        const data = localStorage.getItem(STORAGE_KEY);
+        if (data) tachadas = JSON.parse(data);
+        else tachadas = {};
+      } catch { tachadas = {}; }
+    }
+
+    // Utilidad: retorna true si todas las asignaturas (que tengan id) de un semestre están tachadas
+    function estaSemestreAprobado(nroSemestre) {
+      const sem = malla[nroSemestre];
+      return sem.asignaturas
+        .filter(a => a.id && !a.hito)
+        .every(a => tachadas[a.id]);
+    }
+
+    // Renderizado
+    function renderMalla() {
+      const container = document.getElementById("malla");
+      container.innerHTML = "";
+      malla.forEach((sem, idxSem) => {
+        const div = document.createElement("div");
+        div.className = "semestre";
+        div.innerHTML = `<h2>${sem.semestre}</h2>`;
+        const asignaturasDiv = document.createElement("div");
+        asignaturasDiv.className = "asignaturas";
+        sem.asignaturas.forEach((asig) => {
+          const materia = document.createElement("div");
+          materia.className = "asignatura";
+          materia.textContent = asig.nombre;
+
+          if (tachadas[asig.id]) materia.classList.add("tachada");
+
+          let puedeTachar = true;
+
+          // Requisitos por ramo
+          if (asig.requiere) {
+            puedeTachar = asig.requiere.every(req => tachadas[req]);
+            if (!puedeTachar) {
+              materia.classList.add("requisito");
+              materia.title = "Requiere: " + asig.requiere.map(rid=>{
+                for (let s of malla) for (let a of s.asignaturas) if (a.id === rid) return a.nombre;
+                return rid;
+              }).join(", ");
+            } else {
+              materia.classList.add("habilitada");
+            }
+          } else {
+            materia.classList.add("habilitada");
+          }
+
+          // Hito evaluativo especial
+          if (asig.hito) {
+            puedeTachar = estaSemestreAprobado(1) && estaSemestreAprobado(2);
+            if (!puedeTachar) {
+              materia.classList.add("requisito");
+              materia.title = "Se habilita solo si el 2º y 3º semestre están completos";
+            } else {
+              materia.classList.add("habilitada");
+            }
+          }
+
+          // Gestión del Cuidado de Persona Mayor depende de gestión adulto II
+          if (asig.dependeTachar) {
+            puedeTachar = !!tachadas[asig.dependeTachar];
+            if (!puedeTachar) {
+              materia.classList.add("requisito");
+              materia.title = "Solo se habilita cuando esté aprobado Gestión del Cuidado del Adulto II";
+            } else {
+              materia.classList.add("habilitada");
+            }
+          }
+
+          // Requisito de semestre completo (para internado clínico y electivo 1 de 9°, y todos los de 10°)
+          if (asig.requiereSemestres) {
+            puedeTachar = asig.requiereSemestres.every(idx => estaSemestreAprobado(idx));
+            if (!puedeTachar) {
+              materia.classList.add("requisito");
+              materia.title = "Se habilita solo si los semestres " + 
+                asig.requiereSemestres.map(idx=> (idx+1) + "°").join(" y ") + " están completos";
+            } else {
+              materia.classList.add("habilitada");
+            }
+          }
+
+          if (puedeTachar) {
+            materia.addEventListener("click", () => {
+              if (asig.dependeTachar && !tachadas[asig.dependeTachar]) return;
+              tachadas[asig.id] = !tachadas[asig.id];
+              guardarProgreso();
+              renderMalla();
+            });
+          }
+          asignaturasDiv.appendChild(materia);
+        });
+        div.appendChild(asignaturasDiv);
+        container.appendChild(div);
+      });
+    }
+
+    cargarProgreso();
+    renderMalla();
+  </script>
+</body>
+</html>
