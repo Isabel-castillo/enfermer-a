@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Malla Curricular Enfermería</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --fondo: #fff9fb;
+      --rosa: #f8e2e9;
+      --rosa-borde: #edc8d5;
+      --rosa-hover: #f4d5e0;
+      --rosa-texto: #8d6575;
+      --aprobado: #e7e2e5;
+      --aprobado-borde: #d2c9ce;
+      --texto-aprobado: #716970;
+      --barra-fondo: #f0e5e9;
+      --barra: #d9a7bb;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Montserrat', Arial, sans-serif;
+      background: var(--fondo);
+      margin: 0;
+      padding: 0 0 1.5em;
+      color: #806574;
+      overflow-x: hidden;
+    }
+
+    #fuegos {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .contenido { position: relative; z-index: 1; }
+
+    h1 {
+      text-align: center;
+      background: #f9e8ee;
+      color: #a77c8e;
+      margin: 1.2em auto 0.8em;
+      padding: 0.65em 1em;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      border-radius: 12px;
+      width: fit-content;
+      min-width: 150px;
+      max-width: 90vw;
+      box-shadow: 0 2px 8px #eadde2;
+      font-size: 1.2em;
+      margin-bottom: 0.15em;
+    }
+
+    .subtitulo {
+      text-align: center;
+      margin: 0 auto 0.85em;
+      color: #b99aa7;
+      font-size: 0.62em;
+      letter-spacing: 1.1px;
+      font-weight: 400;
+    }
+
+    #progreso-wrap {
+      width: min(420px, 86vw);
+      margin: 1em auto 0.5em;
+      padding: 0.45em 0.7em;
+      border-radius: 10px;
+      background: #fffdfd;
+      box-shadow: 0 1px 5px #eee2e7;
+    }
+
+    .progreso-textos {
+      display: flex;
+      justify-content: space-between;
+      gap: 1em;
+      align-items: center;
+      margin-bottom: 0.35em;
+      font-size: 0.72em;
+      color: #987889;
+    }
+
+    #barra-fondo {
+      height: 6px;
+      width: 100%;
+      background: var(--barra-fondo);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    #barra {
+      height: 100%;
+      width: 0%;
+      background: var(--barra);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    #malla {
+      display: flex;
+      flex-direction: row;
+      gap: 0.8em;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      align-items: flex-start;
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #e8c6d3 #fff9fb;
+      padding: 0 0.5em 0.6em;
+    }
+
+    .semestre {
+      background: #fffdfd;
+      border-radius: 14px;
+      box-shadow: 0 1px 7px #eadde2;
+      padding: 0.7em 0.7em 1.2em;
+      min-width: 160px;
+      max-width: 160px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 0.4em;
+      flex: 0 0 auto;
+    }
+
+    .semestre h2 {
+      color: #bd91a4;
+      margin: 0 0 0.55em;
+      font-size: 1em;
+      text-align: center;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .asignaturas {
+      display: flex;
+      flex-direction: column;
+      gap: 0.42em;
+      width: 100%;
+      align-items: stretch;
+      margin: 0;
+      padding: 0;
+    }
+
+    .asignatura {
+      cursor: pointer;
+      font-size: 0.92em;
+      background: var(--rosa);
+      border: 1.5px solid var(--rosa-borde);
+      color: var(--rosa-texto);
+      border-radius: 9px;
+      min-width: 0;
+      padding: 0.6em 0.25em;
+      text-align: center;
+      margin: 0;
+      transition: color 0.2s, box-shadow 0.2s, background 0.2s, border-color 0.2s, opacity 0.25s, filter 0.25s;
+      box-shadow: 0 1px 4px #eadde2;
+      font-weight: 500;
+      user-select: none;
+      opacity: 1;
+      filter: none;
+    }
+
+    .asignatura.tachada {
+      text-decoration: none;
+      color: var(--texto-aprobado);
+      background: var(--aprobado);
+      border-color: var(--aprobado-borde);
+      opacity: 1;
+      box-shadow: none;
+      filter: none;
+    }
+
+    .asignatura.habilitada {
+      opacity: 1;
+      filter: none;
+      cursor: pointer;
+    }
+
+    .asignatura.requisito {
+      opacity: 0.42;
+      filter: grayscale(0.35) blur(1.2px);
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .asignatura:hover:not(.tachada):not(.requisito) {
+      box-shadow: 0 2px 9px #dba9bd50;
+      background: var(--rosa-hover);
+      border-color: #d9adbf;
+    }
+
+    .firma {
+      text-align: center;
+      margin: -0.65em auto 0.8em;
+      color: #c6aab5;
+      font-size: 0.48em;
+      letter-spacing: 0.5px;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .malla-scroll {
+      width: 100%;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #e8c6d3 #fff9fb;
+      padding: 0 0.5em 0.35em;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    #malla {
+      width: max-content;
+      max-width: none;
+      overflow: visible;
+      padding: 0;
+      margin: 0 auto;
+      transform: translateY(1.8em);
+    }
+
+    .asignatura { position: relative; }
+
+    #progreso-wrap {
+      width: min(310px, 86vw);
+      flex: 0 0 auto;
+      align-self: center;
+      margin: 0.65em auto 0.35em;
+      padding: 0.32em 0.55em;
+      border-radius: 8px;
+      background: #fffdfd;
+      box-shadow: 0 1px 4px #eee2e7;
+    }
+
+    .progreso-textos { font-size: 0.65em; }
+
+    #gran-final {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 1em;
+    }
+
+    #gran-final.visible { display: flex; }
+
+    #gran-final div {
+      color: #a76f89;
+      font-size: clamp(2rem, 6vw, 4.5rem);
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 15px #fff, 0 0 28px #f3c5d7;
+      animation: aparecer 0.8s ease both;
+    }
+
+    @keyframes aparecer {
+      from { opacity: 0; transform: scale(.65); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @media (max-width: 900px) {
+      #malla { max-width: 98vw; }
+
+      .semestre {
+        min-width: 120px;
+        max-width: 120px;
+        padding: 0.5em 0.2em 0.7em;
+      }
+
+      .asignatura {
+        font-size: 0.76em;
+        padding: 0.4em 0.08em;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .semestre {
+        min-width: 145px;
+        max-width: 145px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="fuegos"></canvas>
+
+  <div class="contenido">
+    <h1>Malla Enfermería</h1>
+    <div class="subtitulo">las amo antonistas</div>
+    <div class="firma">atte. Isabel Castillo</div>
+
+    <div class="container">
+      <div class="malla-scroll">
+        <div id="malla"></div>
+
+        <div id="progreso-wrap">
+          <div class="progreso-textos">
+            <span><strong>Progreso de la carrera</strong></span>
+            <span id="progreso-numero">0%</span>
+          </div>
+
+          <div id="barra-fondo">
+            <div id="barra"></div>
+          </div>
+
+          <div class="progreso-textos" style="margin:0.35em 0 0;font-size:0.68em">
+            <span id="ramos-progreso">0 de 0 ramos aprobados</span>
+            <span id="creditos-progreso"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="gran-final" aria-live="polite">
+      <div>¡LO LOGRAMOS, ANTONISTAS! 💋</div>
+    </div>
+  </div>
+
+  <script>
+    const malla = [
+      {
+        semestre: "1°",
+        asignaturas: [
+          { nombre: "Morfología Básica", id: "morfologia-basica" },
+          { nombre: "Química General y Orgánica", id: "quimica" },
+          { nombre: "Biología Celular", id: "biologia-celular" },
+          { nombre: "Bases de la Enfermería", id: "bases-enfermeria" },
+          { nombre: "Psicología Evolutiva", id: "psicologia-evolutiva" },
+          { nombre: "Antropología", id: "antropologia" }
+        ]
+      },
+      {
+        semestre: "2°",
+        asignaturas: [
+          { nombre: "Integrado Fisiología-Fisiopatología I", id: "fisiologia", requiere: ["biologia-celular", "quimica"] },
+          { nombre: "Bioquímica General", id: "bioquimica", requiere: ["quimica"] },
+          { nombre: "Microbiología General", id: "microbiologia-general", requiere: ["biologia-celular"] },
+          { nombre: "Salud Digital", id: "salud-digital" },
+          { nombre: "Salud Intercultural", id: "salud-intercultural" },
+          { nombre: "IAAS", id: "iaas" }
+        ]
+      },
+      {
+        semestre: "3°",
+        asignaturas: [
+          { nombre: "Integrado Fisiología-Fisiopatología II", id: "fisiologia2", requiere: ["fisiologia"] },
+          { nombre: "Farmacología General", id: "farmacologia", requiere: ["fisiologia"] },
+          { nombre: "Salud Poblacional", id: "salud-poblacional" },
+          { nombre: "Enfermería en el Curso de Vida", id: "curso-de-vida" },
+          { nombre: "Educación para la Salud", id: "educacion-salud" },
+          { nombre: "Comunicación Interdisciplinar", id: "comunicacion-interdisciplinar" }
+        ]
+      },
+      {
+        semestre: "4°",
+        asignaturas: [
+          { nombre: "Administración para la Gestión del Cuidado", id: "administracion-cuidado" },
+          { nombre: "Gestión del Cuidado del Adulto I", id: "cuidado-adulto", requiere: ["curso-de-vida"] },
+          { nombre: "Ética", id: "etica", requiere: ["antropologia"] },
+          { nombre: "Bases de Práctica Basada en Evidencia", id: "bases-evidencia" },
+          { nombre: "Hito Evaluativo", id: "hito-evaluativo", hito: true }
+        ]
+      },
+      {
+        semestre: "5°",
+        asignaturas: [
+          { nombre: "Epidemiología", id: "epidemiologia", requiere: ["salud-poblacional"] },
+          { nombre: "Gestión del Cuidado del Adulto II", id: "cuidado-adulto2", requiere: ["cuidado-adulto"] },
+          { nombre: "Medio Ambiente, Salud y Enfermería", id: "medio-ambiente", requiere: ["administracion-cuidado"] },
+          { nombre: "Bioestadística", id: "bioestadistica" },
+          { nombre: "Gestión de Proyectos en Salud", id: "gestion-proyectos", requiere: ["administracion-cuidado"] },
+          { nombre: "Persona y Sociedad", id: "persona-sociedad", requiere: ["etica"] }
+        ]
+      },
+      {
+        semestre: "6°",
+        asignaturas: [
+          { nombre: "Metodología de la Investigación", id: "metodologia-investigacion" },
+          { nombre: "Gestión del Cuidado de Persona Mayor", id: "cuidado-persona-mayor", dependeTachar: "cuidado-adulto2" },
+          { nombre: "Enfermería en Salud Mental y Psiquiatría", id: "salud-mental", requiere: ["cuidado-adulto2"] },
+          { nombre: "Liderazgo y Toma de Decisiones en Salud", id: "liderazgo", requiere: ["gestion-proyectos"] },
+          { nombre: "Electivo I: Formación y Identidad", id: "electivo1-formacion-identidad" }
+        ]
+      },
+      {
+        semestre: "7°",
+        asignaturas: [
+          { nombre: "Gestión del Cuidado en la Niñez y Adolescencia", id: "cuidado-ninez-adolescencia", requiere: ["cuidado-adulto2"] },
+          { nombre: "Enfermería en Salud Familiar y Comunitaria", id: "salud-familiar-comunitaria", requiere: ["salud-mental"] },
+          { nombre: "Gerencia y Gobernanza para la Gestión en Salud", id: "gerencia-gobernanza", requiere: ["liderazgo"] },
+          { nombre: "Proyecto de Investigación", id: "proyecto-investigacion", requiere: ["metodologia-investigacion"] },
+          { nombre: "Bioética", id: "bioetica" },
+          { nombre: "Electivo II: Formación y Identidad", id: "electivo2-formacion-identidad" }
+        ]
+      },
+      {
+        semestre: "8°",
+        asignaturas: [
+          { nombre: "Enfermería de Urgencia", id: "urgencia", requiere: ["cuidado-ninez-adolescencia"] },
+          { nombre: "Enfermería en Oncología y Cuidados Paliativos", id: "oncologia-paliativos", requiere: ["salud-familiar-comunitaria"] },
+          { nombre: "Liderazgo para la Gestión del Cambio en Equipos de Salud", id: "liderazgo-cambio", requiere: ["gerencia-gobernanza"] },
+          { nombre: "Práctica Basada en la Evidencia", id: "evidencia", requiere: ["proyecto-investigacion"] },
+          { nombre: "Electivo III: Formación y Identidad", id: "electivo3-formacion-identidad" }
+        ]
+      },
+      {
+        semestre: "9°",
+        asignaturas: [
+          { nombre: "Internado Clínico Asistencial", id: "internado-clinico", requiereSemestres: [6, 7] },
+          { nombre: "Electivo I", id: "electivo1", requiereSemestres: [6, 7] },
+          { nombre: "Gestión de Carrera y Desarrollo Profesional", id: "gestion-carrera" }
+        ]
+      },
+      {
+        semestre: "10°",
+        asignaturas: [
+          { nombre: "Internado de Salud Familiar y Comunitaria", id: "internado-familiar-comunitaria", requiereSemestres: [6, 7] },
+          { nombre: "Internado Gestión en Salud", id: "internado-gestion-salud", requiereSemestres: [6, 7] },
+          { nombre: "Electivo II", id: "electivo2-10", requiereSemestres: [6, 7] }
+        ]
+      }
+    ];
+
+    const STORAGE_KEY = "progreso_malla_enfermeria";
+    let tachadas = {};
+
+    function guardarProgreso() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(tachadas));
+      } catch (e) {}
+    }
+
+    function cargarProgreso() {
+      try {
+        const data = localStorage.getItem(STORAGE_KEY);
+        tachadas = data ? JSON.parse(data) : {};
+      } catch {
+        tachadas = {};
+      }
+    }
+
+    function estaSemestreAprobado(nroSemestre) {
+      const sem = malla[nroSemestre];
+      return sem.asignaturas
+        .filter(a => a.id && !a.hito)
+        .every(a => tachadas[a.id]);
+    }
+
+    function ramosContables() {
+      return malla.flatMap(s => s.asignaturas)
+        .filter(a => a.id && !a.hito);
+    }
+
+    function actualizarProgreso() {
+      const todos = ramosContables();
+      const aprobados = todos.filter(a => tachadas[a.id]).length;
+      const porcentaje = todos.length
+        ? Math.round(aprobados / todos.length * 100)
+        : 0;
+
+      document.getElementById("barra").style.width = porcentaje + "%";
+      document.getElementById("progreso-numero").textContent = porcentaje + "%";
+      document.getElementById("ramos-progreso").textContent =
+        `${aprobados} de ${todos.length} ramos aprobados`;
+
+      document.getElementById("creditos-progreso").textContent = "";
+
+      const final = document.getElementById("gran-final");
+
+      if (aprobados === todos.length && todos.length > 0) {
+        final.classList.add("visible");
+      } else {
+        final.classList.remove("visible");
+      }
+    }
+
+    function estaAnioCompleto(anio) {
+      const primero = (anio - 1) * 2;
+      return estaSemestreAprobado(primero) &&
+        estaSemestreAprobado(primero + 1);
+    }
+
+    function renderMalla() {
+      const container = document.getElementById("malla");
+      container.innerHTML = "";
+
+      malla.forEach((sem, idxSem) => {
+        const div = document.createElement("div");
+        div.className = "semestre";
+
+        const numeroRomano = [
+          "I", "II", "III", "IV", "V",
+          "VI", "VII", "VIII", "IX", "X"
+        ][idxSem];
+
+        div.innerHTML = `<h2>${numeroRomano}° semestre</h2>`;
+
+        const asignaturasDiv = document.createElement("div");
+        asignaturasDiv.className = "asignaturas";
+
+        sem.asignaturas.forEach(asig => {
+          const materia = document.createElement("div");
+          materia.className = "asignatura";
+          materia.textContent = asig.nombre;
+
+          if (tachadas[asig.id]) {
+            materia.classList.add("tachada");
+          }
+
+          let puedeTachar = true;
+
+          if (asig.requiere) {
+            puedeTachar = asig.requiere.every(req => tachadas[req]);
+
+            if (!puedeTachar) {
+              materia.classList.add("requisito");
+            } else {
+              materia.classList.add("habilitada");
+            }
+          } else {
+            materia.classList.add("habilitada");
+          }
+
+          if (asig.hito) {
+            puedeTachar = estaSemestreAprobado(1) &&
+              estaSemestreAprobado(2);
+
+            if (!puedeTachar) {
+              materia.classList.add("requisito");
+            } else {
+              materia.classList.add("habilitada");
+            }
+          }
+
+          if (asig.dependeTachar) {
+            puedeTachar = !!tachadas[asig.dependeTachar];
+
+            if (!puedeTachar) {
+              materia.classList.add("requisito");
+            } else {
+              materia.classList.add("habilitada");
+            }
+          }
+
+          if (asig.requiereSemestres) {
+            puedeTachar = asig.requiereSemestres.every(
+              idx => estaSemestreAprobado(idx)
+            );
+
+            if (!puedeTachar) {
+              materia.classList.add("requisito");
+            } else {
+              materia.classList.add("habilitada");
+            }
+          }
+
+          if (puedeTachar) {
+            materia.addEventListener("click", () => {
+              const anio = Math.ceil((idxSem + 1) / 2);
+              const estabaCompleto = estaAnioCompleto(anio);
+
+              tachadas[asig.id] = !tachadas[asig.id];
+
+              guardarProgreso();
+              renderMalla();
+
+              if (!estabaCompleto && estaAnioCompleto(anio)) {
+                lanzarFuegosArtificiales();
+              }
+
+              if (ramosContables().every(a => tachadas[a.id])) {
+                lanzarFuegosArtificiales();
+              }
+            });
+          }
+
+          asignaturasDiv.appendChild(materia);
+        });
+
+        div.appendChild(asignaturasDiv);
+        container.appendChild(div);
+      });
+
+      actualizarProgreso();
+    }
+
+    // Fuegos artificiales sutiles en el fondo.
+    const canvas = document.getElementById("fuegos");
+    const ctx = canvas.getContext("2d");
+
+    let particulas = [];
+    let animando = false;
+
+    function ajustarCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+
+      canvas.style.width = window.innerWidth + "px";
+      canvas.style.height = window.innerHeight + "px";
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    window.addEventListener("resize", ajustarCanvas);
+    ajustarCanvas();
+
+    function lanzarFuegosArtificiales() {
+      const colores = [
+        "#e8a9c3",
+        "#f1c6d6",
+        "#d5b7e7",
+        "#f3d9ad",
+        "#c8d9d1"
+      ];
+
+      const ancho = window.innerWidth;
+      const alto = window.innerHeight;
+
+      const carreraCompleta = ramosContables()
+        .every(a => tachadas[a.id]);
+
+      const cantidadRondas = carreraCompleta ? 20 : 12;
+
+      for (let r = 0; r < cantidadRondas; r++) {
+        const x = ancho * (0.18 + Math.random() * 0.64);
+        const y = alto * (0.18 + Math.random() * 0.48);
+
+        const color = colores[
+          Math.floor(Math.random() * colores.length)
+        ];
+
+        const cantidadParticulas = carreraCompleta ? 105 : 78;
+
+        for (let i = 0; i < cantidadParticulas; i++) {
+          const ang = Math.PI * 2 * i / cantidadParticulas;
+          const vel = 1.8 + Math.random() * 5.2;
+
+          particulas.push({
+            x,
+            y,
+            vx: Math.cos(ang) * vel,
+            vy: Math.sin(ang) * vel,
+            vida: 140 + Math.random() * 90,
+            maxVida: 230,
+            color,
+            radio: 1.2 + Math.random() * 2.0,
+            confeti: Math.random() < 0.16,
+            giro: Math.random() * Math.PI,
+            giroVel: (Math.random() - 0.5) * 0.18
+          });
+        }
+      }
+
+      if (!animando) {
+        animando = true;
+        requestAnimationFrame(animarFuegos);
+      }
+    }
+
+    function animarFuegos() {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      particulas = particulas.filter(p => p.vida > 0);
+
+      particulas.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.018;
+        p.vx *= 0.99;
+        p.vy *= 0.99;
+        p.vida--;
+
+        ctx.globalAlpha = Math.max(0, p.vida / p.maxVida) * 0.9;
+        ctx.fillStyle = p.color;
+
+        if (p.confeti) {
+          p.giro += p.giroVel;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.giro);
+          ctx.fillRect(
+            -p.radio * 1.1,
+            -p.radio * 2.2,
+            p.radio * 2.2,
+            p.radio * 4.4
+          );
+          ctx.restore();
+        } else {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radio, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      ctx.globalAlpha = 1;
+
+      if (particulas.length) {
+        requestAnimationFrame(animarFuegos);
+      } else {
+        animando = false;
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      }
+    }
+
+    cargarProgreso();
+    renderMalla();
+  </script>
+</body>
+</html>
